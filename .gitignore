@@ -1,3 +1,4 @@
-**/
-!/Template
+/**/
+!/Template/
+!/Template/**
 *.sln
