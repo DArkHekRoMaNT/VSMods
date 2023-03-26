@@ -68,7 +68,7 @@
 
 					if (!string.IsNullOrWhiteSpace(Side))
 					{
-						sb.AppendLine("\t\"side\": \"" + Side + "\"");
+						sb.AppendLine("\t\"side\": \"" + Side + "\",");
 						if (Side == "Universal" && !(RequiredOnClient && RequiredOnServer))
 						{
 							sb.AppendLine("\t\"requiredOnClient\": " + RequiredOnClient.ToString().ToLower() + ",");
