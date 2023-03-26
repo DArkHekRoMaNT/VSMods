@@ -1,4 +1,3 @@
-<!-- ModBuilder v1.0.3 -->
 <Project>
 	<PropertyGroup>
 		<Configurations>Debug;Release;Publish</Configurations>
