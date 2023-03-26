@@ -5,6 +5,8 @@
 		<Version>1.0.0</Version>
 		<Authors>DArkHekRoMaNT</Authors>
 		<GameVersion>1.18.0-pre.6</GameVersion>
+		<Description></Description>
+		<Website></Website>
 	</PropertyGroup>
 	<ItemGroup>		
 		<Dependencies Include="commonlib">
