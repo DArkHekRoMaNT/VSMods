@@ -6,7 +6,7 @@
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>pdbonly</DebugType>
 		<Optimize>true</Optimize>
-		<PathMap>$(MSBuildProjectDirectory)=/</PathMap>
+		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)/</PathMap>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
