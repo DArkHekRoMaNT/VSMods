@@ -75,7 +75,7 @@
 						}
 					}
 
-					sb.AppendLine("\t\"dependecies\": {");
+					sb.AppendLine("\t\"dependencies\": {");
 					sb.Append("\t\t\"game\": \"" + GameVersion + "\"");
 					if (Dependencies != null)
 					{
