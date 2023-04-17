@@ -4,13 +4,13 @@
 		<ModId>template</ModId>
 		<Version>1.0.0</Version>
 		<Authors>DArkHekRoMaNT</Authors>
-		<GameVersion>1.18.0-pre.6</GameVersion>
+		<GameVersion>1.18.0</GameVersion>
 		<Description></Description>
 		<Website></Website>
 	</PropertyGroup>
 	<ItemGroup>		
 		<Dependencies Include="commonlib">
-			<Version>1.0.3</Version>
+			<Version>2.0.3</Version>
 		</Dependencies>
 		
 		<IncludeFiles Include="modicon.png" />
