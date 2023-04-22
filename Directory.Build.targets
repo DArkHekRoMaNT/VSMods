@@ -1,7 +1,7 @@
 <Project>
 	<UsingTask TaskName="CreateModInfo"
-			   TaskFactory="CodeTaskFactory"
-			   AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+               TaskFactory="CodeTaskFactory"
+               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
 		<ParameterGroup>
 			<Name ParameterType="System.String" Required="true" />
 			<ModId ParameterType="System.String" />
@@ -24,103 +24,104 @@
 			<Using Namespace="System.Text.RegularExpressions"/>
 			<Code Type="Fragment" Language="cs">
 				<![CDATA[
-					var sb = new StringBuilder();
-					sb.AppendLine("{");
-					sb.AppendLine("\t\"type\": \"code\",");
-					sb.AppendLine("\t\"name\": \"" + Name + "\",");
+                    var sb = new StringBuilder();
+                    sb.AppendLine("{");
+                    sb.AppendLine("\t\"type\": \"code\",");
+                    sb.AppendLine("\t\"name\": \"" + Name + "\",");
 
-					if (string.IsNullOrWhiteSpace(ModId))
-					{
-						ModId = Name.ToLower();
-						ModId = Regex.Replace(ModId, "[^a-z0-9]", "");
-					}
-					sb.AppendLine("\t\"modid\": \"" + ModId + "\",");
-					
-					sb.AppendLine("\t\"version\": \"" + Version + "\",");
+                    if (string.IsNullOrWhiteSpace(ModId))
+                    {
+                        ModId = Name.ToLower();
+                        ModId = Regex.Replace(ModId, "[^a-z0-9]", "");
+                    }
+                    sb.AppendLine("\t\"modid\": \"" + ModId + "\",");
+                    
+                    sb.AppendLine("\t\"version\": \"" + Version + "\",");
 
-					if (!string.IsNullOrWhiteSpace(NetworkVersion))
-					{
-						sb.AppendLine("\t\"networkVersion\": \"" + NetworkVersion + "\",");
-					}
+                    if (!string.IsNullOrWhiteSpace(NetworkVersion))
+                    {
+                        sb.AppendLine("\t\"networkVersion\": \"" + NetworkVersion + "\",");
+                    }
 
-					if (!string.IsNullOrWhiteSpace(Description))
-					{
-						sb.AppendLine("\t\"description\": \"" + Description + "\",");
-					}
+                    if (!string.IsNullOrWhiteSpace(Description))
+                    {
+                        sb.AppendLine("\t\"description\": \"" + Description + "\",");
+                    }
 
-					if (!string.IsNullOrWhiteSpace(Website))
-					{
-						sb.AppendLine("\t\"website\": \"" + Website + "\",");
-					}
+                    if (!string.IsNullOrWhiteSpace(Website))
+                    {
+                        sb.AppendLine("\t\"website\": \"" + Website + "\",");
+                    }
 
-					if (!string.IsNullOrWhiteSpace(Authors))
-					{
-						Authors = string.Join(", ", Authors.Split(',').Select(e => "\"" + e.Trim() + "\""));
-						sb.AppendLine("\t\"authors\": [" + Authors + "],");
-					}
+                    if (!string.IsNullOrWhiteSpace(Authors))
+                    {
+                        Authors = string.Join(", ", Authors.Split(',').Select(e => "\"" + e.Trim() + "\""));
+                        sb.AppendLine("\t\"authors\": [" + Authors + "],");
+                    }
 
-					if (!string.IsNullOrWhiteSpace(Contributors))
-					{
-						Contributors = string.Join(", ", Contributors.Split(',').Select(e => "\"" + e.Trim() + "\""));
-						sb.AppendLine("\t\"contributors\": [" + Contributors + "],");
-					}
+                    if (!string.IsNullOrWhiteSpace(Contributors))
+                    {
+                        Contributors = string.Join(", ", Contributors.Split(',').Select(e => "\"" + e.Trim() + "\""));
+                        sb.AppendLine("\t\"contributors\": [" + Contributors + "],");
+                    }
 
-					if (!string.IsNullOrWhiteSpace(Side))
-					{
-						sb.AppendLine("\t\"side\": \"" + Side + "\",");
-						if (Side == "Universal" && !(RequiredOnClient && RequiredOnServer))
-						{
-							sb.AppendLine("\t\"requiredOnClient\": " + RequiredOnClient.ToString().ToLower() + ",");
-							sb.AppendLine("\t\"requiredOnServer\": " + RequiredOnServer.ToString().ToLower() + ",");
-						}
-					}
+                    if (!string.IsNullOrWhiteSpace(Side))
+                    {
+                        sb.AppendLine("\t\"side\": \"" + Side + "\",");
+                        if (Side == "Universal" && !(RequiredOnClient && RequiredOnServer))
+                        {
+                            sb.AppendLine("\t\"requiredOnClient\": " + RequiredOnClient.ToString().ToLower() + ",");
+                            sb.AppendLine("\t\"requiredOnServer\": " + RequiredOnServer.ToString().ToLower() + ",");
+                        }
+                    }
 
-					sb.AppendLine("\t\"dependencies\": {");
-					sb.Append("\t\t\"game\": \"" + GameVersion + "\"");
-					if (Dependencies != null)
-					{
-						foreach (var dependency in Dependencies)
-						{							
-							string modid = dependency.ItemSpec;
-							string version = dependency.GetMetadata("Version");
-							sb.AppendLine(",");
-							sb.Append("\t\t\"" + modid + "\": \"" + version + "\"");
-						}
-					}
-					sb.AppendLine();
-					sb.AppendLine("\t}");
+                    sb.AppendLine("\t\"dependencies\": {");
+                    sb.Append("\t\t\"game\": \"" + GameVersion + "\"");
+                    if (Dependencies != null)
+                    {
+                        foreach (var dependency in Dependencies)
+                        {                           
+                            string modid = dependency.ItemSpec;
+                            string version = dependency.GetMetadata("Version");
+                            sb.AppendLine(",");
+                            sb.Append("\t\t\"" + modid + "\": \"" + version + "\"");
+                        }
+                    }
+                    sb.AppendLine();
+                    sb.AppendLine("\t}");
 
-					sb.AppendLine("}");
+                    sb.AppendLine("}");
 
-					if (!Directory.Exists(OutputPath))
-					{
-						Directory.CreateDirectory(OutputPath);
-					}
-					File.WriteAllText(OutputPath + "modinfo.json", sb.ToString());
+                    if (!Directory.Exists(OutputPath))
+                    {
+                        Directory.CreateDirectory(OutputPath);
+                    }
+                    File.WriteAllText(OutputPath + "modinfo.json", sb.ToString());
                 ]]>
 			</Code>
 		</Task>
 	</UsingTask>
 
 	<Target Name="Prepare" AfterTargets="PreBuildEvent">
+		<MakeDir Directories="$(AssetsDir)" />
 		<RemoveDir Directories="$(OutputPath)/assets" />
 
 		<!-- Create modinfo.json -->
 		<CreateModInfo
-			Name="$(Name)"
-			ModId="$(ModId)"
-			Version="$(Version)"
-			NetworkVersion="$(NetworkVersion)"
-			Description="$(Description)"
-			Website="$(Website)"
-			Authors="$(Authors)"
-			Contributors="$(Contributors)"
-			Side="$(Side)"
-			RequiredOnClient="$(RequiredOnClient)"
-			RequiredOnServer="$(RequiredOnServer)"
-			GameVersion="$(MinimalGameVersion)"
-			Dependencies="@(Dependencies)"
-			OutputPath="$(OutputPath)" />
+            Name="$(Name)"
+            ModId="$(ModId)"
+            Version="$(Version)"
+            NetworkVersion="$(NetworkVersion)"
+            Description="$(Description)"
+            Website="$(Website)"
+            Authors="$(Authors)"
+            Contributors="$(Contributors)"
+            Side="$(Side)"
+            RequiredOnClient="$(RequiredOnClient)"
+            RequiredOnServer="$(RequiredOnServer)"
+            GameVersion="$(MinimalGameVersion)"
+            Dependencies="@(Dependencies)"
+            OutputPath="$(OutputPath)" />
 	</Target>
 
 	<!-- Move assets to output folder -->
@@ -136,8 +137,8 @@
 	<Target Name="MakeZip">
 		<MakeDir Directories="$(ReleasesDir)" />
 		<ZipDirectory DestinationFile="$(ReleasesDir)/$(TargetName)_v$(GameVersion)_v$(Version).zip"
-					  SourceDirectory="$(OutputPath)"
-					  Overwrite="true" />
+                      SourceDirectory="$(OutputPath)"
+                      Overwrite="true" />
 		<Message Text="Created release $(TargetName)_v$(GameVersion)_v$(Version).zip" Importance="High" />
 	</Target>
 
@@ -146,8 +147,8 @@
 
 	<!-- Build in Publish mode for package mod -->
 	<Target Name="PackageModIfPublish"
-			AfterTargets="PostBuildEvent"
-			Condition=" '$(Configuration)' == 'Publish'">
+            AfterTargets="PostBuildEvent"
+            Condition=" '$(Configuration)' == 'Publish'">
 		<CallTarget Targets="AddAssets;MakeZip" />
 	</Target>
 </Project>
