@@ -136,10 +136,10 @@
 	<!-- Creates .zip in Releases -->
 	<Target Name="MakeZip">
 		<MakeDir Directories="$(ReleasesDir)" />
-		<ZipDirectory DestinationFile="$(ReleasesDir)/$(TargetName)_v$(GameVersion)_v$(Version).zip"
+		<ZipDirectory DestinationFile="$(ReleasesDir)/$(TargetName)_VS$(GameVersion)_$(TargetFramework)_v$(Version).zip"
                       SourceDirectory="$(OutputPath)"
                       Overwrite="true" />
-		<Message Text="Created release $(TargetName)_v$(GameVersion)_v$(Version).zip" Importance="High" />
+		<Message Text="Created release $(TargetName)_VS$(GameVersion)_$(TargetFramework)_v$(Version).zip" Importance="High" />
 	</Target>
 
 	<!-- Call it by external tool for package mod -->
