@@ -104,7 +104,8 @@
 
 	<Target Name="Prepare" AfterTargets="PreBuildEvent">
 		<MakeDir Directories="$(AssetsDir)" />
-		<RemoveDir Directories="$(OutputPath)/assets" />
+		<RemoveDir Directories="$(OutputPath)/" />
+		<MakeDir Directories="$(OutputPath)/" />
 
 		<!-- Create modinfo.json -->
 		<CreateModInfo
@@ -150,10 +151,5 @@
             AfterTargets="PostBuildEvent"
             Condition=" '$(Configuration)' == 'Publish'">
 		<CallTarget Targets="AddAssets;MakeZip" />
-	</Target>
-	<Target Name="PackageModIfPublishPrepare"
-        AfterTargets="PreBuildEvent"
-        Condition=" '$(Configuration)' == 'Publish'">
-		<RemoveDir Directories="$(OutDir)" />
 	</Target>
 </Project>
