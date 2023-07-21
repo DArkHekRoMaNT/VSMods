@@ -151,4 +151,9 @@
             Condition=" '$(Configuration)' == 'Publish'">
 		<CallTarget Targets="AddAssets;MakeZip" />
 	</Target>
+	<Target Name="PackageModIfPublishPrepare"
+        AfterTargets="PreBuildEvent"
+        Condition=" '$(Configuration)' == 'Publish'">
+		<RemoveDir Directories="$(OutDir)" />
+	</Target>
 </Project>
