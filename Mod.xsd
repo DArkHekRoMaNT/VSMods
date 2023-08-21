@@ -3,6 +3,13 @@
            attributeFormDefault="unqualified"
            elementFormDefault="qualified"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="type" final="restriction" >
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Code" />
+      <xs:enumeration value="Content" />
+      <xs:enumeration value="Theme" />
+    </xs:restriction>
+  </xs:simpleType>
   <xs:simpleType name="side" final="restriction" >
     <xs:restriction base="xs:string">
       <xs:enumeration value="Universal" />
@@ -42,6 +49,13 @@
               </xs:documentation>
             </xs:annotation>
             <xs:all>
+              <xs:element minOccurs="0" name="Type" type="type">
+                <xs:annotation>
+                  <xs:documentation xml:lang="en">
+                    The type of mod. Can be "Code", "Content" or "Theme". Default value = "Code"
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
               <xs:element minOccurs="1" name="Name" type="xs:string">
                 <xs:annotation>
                   <xs:documentation xml:lang="en">

@@ -3,6 +3,7 @@
                TaskFactory="CodeTaskFactory"
                AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
 		<ParameterGroup>
+			<Type ParameterType="System.String" />
 			<Name ParameterType="System.String" Required="true" />
 			<ModId ParameterType="System.String" />
 			<Version ParameterType="System.String" Required="true" />
@@ -26,7 +27,16 @@
 				<![CDATA[
                     var sb = new StringBuilder();
                     sb.AppendLine("{");
-                    sb.AppendLine("\t\"type\": \"code\",");
+                    
+                    if (string.IsNullOrWhiteSpace(Type))
+                    {
+                        sb.AppendLine("\t\"type\": \"Code\",");
+                    }
+                    else
+                    {
+                        sb.AppendLine("\t\"type\": \"" + Type + "\",");
+                    }
+                    
                     sb.AppendLine("\t\"name\": \"" + Name + "\",");
 
                     if (string.IsNullOrWhiteSpace(ModId))
@@ -109,6 +119,7 @@
 
 		<!-- Create modinfo.json -->
 		<CreateModInfo
+            Type="$(Type)"
             Name="$(Name)"
             ModId="$(ModId)"
             Version="$(Version)"
