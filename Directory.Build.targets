@@ -1,7 +1,7 @@
 <Project>
 	<UsingTask TaskName="CreateModInfo"
-               TaskFactory="CodeTaskFactory"
-               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+               TaskFactory="RoslynCodeTaskFactory"
+               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
 		<ParameterGroup>
 			<Type ParameterType="System.String" />
 			<Name ParameterType="System.String" Required="true" />
@@ -112,6 +112,58 @@
 		</Task>
 	</UsingTask>
 
+	<UsingTask TaskName="ResolveDependency"
+               TaskFactory="RoslynCodeTaskFactory"
+               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup>
+			<ModId ParameterType="System.String" Required="true" />
+			<Version ParameterType="System.String" Required="true" />
+			<JsonFilePath ParameterType="System.String" Required="true" />
+			<LocalPath ParameterType="System.String" Required="true" Output="true" />
+			<Url ParameterType="System.String" Output="true" />
+		</ParameterGroup>
+		<Task>
+			<Reference Include="System.Memory" />
+			<Reference Include="System.Text.Json" />
+			<Using Namespace="System" />
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.Text.Json" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
+                    bool found = false;
+                    string json = File.ReadAllText(JsonFilePath);
+                    using (JsonDocument doc = JsonDocument.Parse(json))
+                    {
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("statuscode", out var statusCodeElement) && statusCodeElement.GetString() == "200")
+                        {
+                            if (root.TryGetProperty("mod", out var modElement) && modElement.TryGetProperty("releases", out var releasesElement))
+                            {
+                                foreach (var release in releasesElement.EnumerateArray())
+                                {
+                                    if (release.TryGetProperty("modversion", out var modVersionElement) && modVersionElement.GetString() == Version)
+                                    {
+                                        if (release.TryGetProperty("mainfile", out var mainFileElement))
+                                        {
+                                            Url = "https://mods.vintagestory.at/" + mainFileElement.GetString(); 
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        throw new Exception("Unknown dependency: " + ModId + "@" + Version);
+                    }
+                ]]>
+			</Code>
+		</Task>
+	</UsingTask>
+
 	<Target Name="Prepare" AfterTargets="PreBuildEvent">
 		<MakeDir Directories="$(AssetsDir)" />
 		<RemoveDir Directories="$(OutputPath)/" />
@@ -180,8 +232,42 @@
 		<Message Condition=" '@(CrowdinZipName)' != '' " Text="Updated lang files from crowdin" Importance="High" />
 	</Target>
 
+	<!-- Download dependecies -->
+	<Target Name="DownloadDependencies" BeforeTargets="PreBuildEvent" >
+		<Message Text="Deps: @(Dependencies)@@(Dependencies -> '%(Version)')" Importance="High" />
+
+		<!-- Damn MSBuild inline tasks and web requests. I had to download it to file o.O -->
+		<DownloadFile
+            SourceUrl="@(Dependencies -> 'https://mods.vintagestory.at/api/mod/%(Identity)')"
+            DestinationFolder="$(IntermediateOutputPath)/temp"
+            DestinationFileName="@(Dependencies -> '%(Identity).json')">
+			<Output TaskParameter="DownloadedFile" ItemName="JsonFilePaths" />
+		</DownloadFile>
+
+		<ResolveDependency
+            ModId="@(Dependencies -> '%(Identity)')"
+            Version="@(Dependencies -> '%(Version)')"
+            JsonFilePath="@(JsonFilePaths)"
+            LocalPath="@(Dependencies -> '$(ModsDir)/%(Identity)')"
+            ContinueOnError="WarnAndContinue">
+			<Output TaskParameter="Url" ItemName="ModdbLinks" />
+			<Output TaskParameter="LocalPath" ItemName="DownloadedLocalPaths" />
+		</ResolveDependency>
+
+		<DownloadFile
+            SourceUrl="@(ModdbLinks)"
+            DestinationFolder="$(IntermediateOutputPath)">
+			<Output TaskParameter="DownloadedFile" ItemName="DownloadedFiles" />
+		</DownloadFile>
+
+		<RemoveDir Directories="$(IntermediateOutputPath)/temp" />
+		<RemoveDir Directories="@(DownloadedLocalPaths)" />
+		<Unzip SourceFiles="@(DownloadedFiles)" DestinationFolder="@(DownloadedLocalPaths)" />
+		<Delete Files="@(DownloadedFiles)" />
+	</Target>
+
 	<!-- Call it by external tool for package mod -->
-	<Target Name="PackageMod" DependsOnTargets="Restore;Build;UpdateLang;AddAssets;MakeZip"/>
+	<Target Name="PackageMod" DependsOnTargets="Restore;Build;UpdateLang;AddAssets;MakeZip" />
 
 	<!-- Build in Publish mode for package mod -->
 	<Target Name="PackageModIfPublish"
