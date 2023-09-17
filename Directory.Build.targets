@@ -145,22 +145,48 @@
 		<Copy SourceFiles="@(Assets)" DestinationFolder="$(OutputPath)assets/%(RecursiveDir)" />
 	</Target>
 
-	<!-- Creates .zip in Releases -->
+	<!-- Create .zip in Releases -->
 	<Target Name="MakeZip">
+		<PropertyGroup>
+			<ReleaseName>$(TargetName)_VS$(GameVersion)_$(TargetFramework)_v$(Version).zip</ReleaseName>
+		</PropertyGroup>
 		<MakeDir Directories="$(ReleasesDir)" />
-		<ZipDirectory DestinationFile="$(ReleasesDir)/$(TargetName)_VS$(GameVersion)_$(TargetFramework)_v$(Version).zip"
+		<ZipDirectory DestinationFile="$(ReleasesDir)/$(ReleaseName)"
                       SourceDirectory="$(OutputPath)"
                       Overwrite="true" />
-		<Message Text="Created release $(TargetName)_VS$(GameVersion)_$(TargetFramework)_v$(Version).zip" Importance="High" />
+		<Message Text="Created release $(ReleaseName)" Importance="High" />
+	</Target>
+
+	<!-- Update lang files from crowdin -->
+	<Target Name="UpdateLang">
+		<PropertyGroup>
+			<CrowdinFileName>$(ModId)-$([System.String]::Copy('$(Authors)').ToLower()).zip</CrowdinFileName>
+			<CrowdinZipUrl>https://www.dropbox.com/scl/fo/q7u3idxz3edsytki8n6m4/h/$(CrowdinFileName)?dl=1&amp;rlkey=mc3xn22a49qwrjp5cmx1he0ay</CrowdinZipUrl>
+		</PropertyGroup>
+
+		<DownloadFile
+            SourceUrl="$(CrowdinZipUrl)"
+            DestinationFolder="$(IntermediateOutputPath)"
+            DestinationFileName="$(CrowdinFileName)"
+            ContinueOnError="WarnAndContinue">
+			<Output TaskParameter="DownloadedFile" ItemName="CrowdinZipName" />
+		</DownloadFile>
+
+		<Unzip
+            Condition=" '@(CrowdinZipName)' != '' "
+            SourceFiles="@(CrowdinZipName)"
+            DestinationFolder="$(AssetsDir)/$(ModId)/lang" />
+
+		<Message Condition=" '@(CrowdinZipName)' != '' " Text="Updated lang files from crowdin" Importance="High" />
 	</Target>
 
 	<!-- Call it by external tool for package mod -->
-	<Target Name="PackageMod" DependsOnTargets="Restore;Build;AddAssets;MakeZip"/>
+	<Target Name="PackageMod" DependsOnTargets="Restore;Build;UpdateLang;AddAssets;MakeZip"/>
 
 	<!-- Build in Publish mode for package mod -->
 	<Target Name="PackageModIfPublish"
             AfterTargets="PostBuildEvent"
             Condition=" '$(Configuration)' == 'Publish'">
-		<CallTarget Targets="AddAssets;MakeZip" />
+		<CallTarget Targets="UpdateLang;AddAssets;MakeZip" />
 	</Target>
 </Project>
