@@ -3,6 +3,8 @@
 		<Configurations>Debug;Release;Publish</Configurations>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+		<GenerateDependencyFile>false</GenerateDependencyFile>
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>pdbonly</DebugType>
 		<Optimize>true</Optimize>
