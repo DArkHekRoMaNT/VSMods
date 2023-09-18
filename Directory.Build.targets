@@ -118,9 +118,8 @@
 		<ParameterGroup>
 			<ModId ParameterType="System.String" Required="true" />
 			<Version ParameterType="System.String" Required="true" />
-			<JsonFilePath ParameterType="System.String" Required="true" />
-			<LocalPath ParameterType="System.String" Required="true" Output="true" />
-			<Url ParameterType="System.String" Output="true" />
+			<JsonFileDirectory ParameterType="System.String" Required="true" />
+			<DownloadMod ParameterType="Microsoft.Build.Framework.ITaskItem" Output="true" />
 		</ParameterGroup>
 		<Task>
 			<Reference Include="System.Memory" />
@@ -128,10 +127,12 @@
 			<Using Namespace="System" />
 			<Using Namespace="System.IO" />
 			<Using Namespace="System.Text.Json" />
+			<Using Namespace="Microsoft.Build.Utilities" />
 			<Code Type="Fragment" Language="cs">
-				<![CDATA[
-                    bool found = false;
-                    string json = File.ReadAllText(JsonFilePath);
+				<![CDATA[					
+                    string json = File.ReadAllText(JsonFileDirectory + "/" + ModId + "_v" + Version + ".json");
+                    string url = null;
+                    
                     using (JsonDocument doc = JsonDocument.Parse(json))
                     {
                         var root = doc.RootElement;
@@ -145,8 +146,7 @@
                                     {
                                         if (release.TryGetProperty("mainfile", out var mainFileElement))
                                         {
-                                            Url = "https://mods.vintagestory.at/" + mainFileElement.GetString(); 
-                                            found = true;
+                                            url = "https://mods.vintagestory.at/" + mainFileElement.GetString(); 
                                             break;
                                         }
                                     }
@@ -155,9 +155,14 @@
                         }
                     }
 
-                    if (!found)
+                    if (url != null)
                     {
-                        throw new Exception("Unknown dependency: " + ModId + "@" + Version);
+                        DownloadMod = new TaskItem(ModId);
+                        DownloadMod.SetMetadata("Url", url);
+                    }
+                    else
+                    {
+                        Log.LogError("Unknown dependency: " + ModId + "@" + Version);
                     }
                 ]]>
 			</Code>
@@ -220,50 +225,58 @@
             SourceUrl="$(CrowdinZipUrl)"
             DestinationFolder="$(IntermediateOutputPath)"
             DestinationFileName="$(CrowdinFileName)"
-            ContinueOnError="WarnAndContinue">
+			ContinueOnError="WarnAndContinue">
 			<Output TaskParameter="DownloadedFile" ItemName="CrowdinZipName" />
 		</DownloadFile>
-
-		<Unzip
-            Condition=" '@(CrowdinZipName)' != '' "
-            SourceFiles="@(CrowdinZipName)"
-            DestinationFolder="$(AssetsDir)/$(ModId)/lang" />
-
-		<Message Condition=" '@(CrowdinZipName)' != '' " Text="Updated lang files from crowdin" Importance="High" />
+		
+		<Unzip Condition=" '@(CrowdinZipName)' != ''" SourceFiles="@(CrowdinZipName)" DestinationFolder="$(AssetsDir)/$(ModId)/lang" />
+		<Message Condition=" '@(CrowdinZipName)' != ''" Text="Updated lang files from crowdin" Importance="High" />
+		
+		<Warning Condition=" '@(CrowdinZipName)' == ''" Text="Failed update lang files. No $(CrowdinFileName) on crowdin dropbox?" />
 	</Target>
-
+	
 	<!-- Download dependecies -->
-	<Target Name="DownloadDependencies" BeforeTargets="PreBuildEvent" >
-		<Message Text="Deps: @(Dependencies)@@(Dependencies -> '%(Version)')" Importance="High" />
+	<Target Name="DownloadDependencies" BeforeTargets="PreBuildEvent" Condition=" '@(Dependencies)' != '' ">
+		<Message Text="Deps:@(Dependencies -> ' %(Identity)@%(Version)')" Importance="High" />
 
+		<PropertyGroup>
+			<ModdbApiRequestFolder>$(IntermediateOutputPath)/moddbapi</ModdbApiRequestFolder>
+		</PropertyGroup>
+		
 		<!-- Damn MSBuild inline tasks and web requests. I had to download it to file o.O -->
 		<DownloadFile
-            SourceUrl="@(Dependencies -> 'https://mods.vintagestory.at/api/mod/%(Identity)')"
-            DestinationFolder="$(IntermediateOutputPath)/temp"
-            DestinationFileName="@(Dependencies -> '%(Identity).json')">
-			<Output TaskParameter="DownloadedFile" ItemName="JsonFilePaths" />
+            SourceUrl="https://mods.vintagestory.at/api/mod/@(Dependencies)"
+            DestinationFolder="$(ModdbApiRequestFolder)"
+			DestinationFileName="%(Identity)_v%(Version).json"
+            ContinueOnError="WarnAndContinue">
 		</DownloadFile>
 
 		<ResolveDependency
-            ModId="@(Dependencies -> '%(Identity)')"
-            Version="@(Dependencies -> '%(Version)')"
-            JsonFilePath="@(JsonFilePaths)"
-            LocalPath="@(Dependencies -> '$(ModsDir)/%(Identity)')"
-            ContinueOnError="WarnAndContinue">
-			<Output TaskParameter="Url" ItemName="ModdbLinks" />
-			<Output TaskParameter="LocalPath" ItemName="DownloadedLocalPaths" />
+			ModId="%(Dependencies.Identity)"
+            Version="%(Dependencies.Version)"
+            JsonFileDirectory="$(ModdbApiRequestFolder)"
+			ContinueOnError="WarnAndContinue">
+			<Output TaskParameter="DownloadMod" ItemName="DownloadMods" />
 		</ResolveDependency>
 
 		<DownloadFile
-            SourceUrl="@(ModdbLinks)"
-            DestinationFolder="$(IntermediateOutputPath)">
+			Condition=" '@(DownloadMods)' != '' "
+            SourceUrl="%(DownloadMods.Url)"
+            DestinationFolder="$(IntermediateOutputPath)/mods"
+            ContinueOnError="WarnAndContinue">
 			<Output TaskParameter="DownloadedFile" ItemName="DownloadedFiles" />
 		</DownloadFile>
 
-		<RemoveDir Directories="$(IntermediateOutputPath)/temp" />
-		<RemoveDir Directories="@(DownloadedLocalPaths)" />
-		<Unzip SourceFiles="@(DownloadedFiles)" DestinationFolder="@(DownloadedLocalPaths)" />
+		<RemoveDir Directories="@(DownloadMods -> '$(ModsDir)/%Identity')" />
+		<Unzip Condition=" '$(DownloadedFiles)' != '' " SourceFiles="@(DownloadedFiles)" DestinationFolder="@(DownloadMods -> '$(ModsDir)/%Identity')" />
 		<Delete Files="@(DownloadedFiles)" />
+
+		<!-- May be not included in props -->
+		<ItemGroup>
+			<Reference Include="$(ModsDir)/**/*.dll" Exclude="$(OutputPath)*.dll">
+				<Private>false</Private>
+			</Reference>
+		</ItemGroup>
 	</Target>
 
 	<!-- Call it by external tool for package mod -->
@@ -275,4 +288,5 @@
             Condition=" '$(Configuration)' == 'Publish'">
 		<CallTarget Targets="UpdateLang;AddAssets;MakeZip" />
 	</Target>
+
 </Project>
