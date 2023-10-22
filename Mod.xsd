@@ -150,6 +150,13 @@
                   </xs:documentation>
                 </xs:annotation>
               </xs:element>
+              <xs:element minOccurs="0" name="NoLang" type="xs:boolean" default="true">
+                <xs:annotation>
+                  <xs:documentation xml:lang="en">
+                    Disable lang files updating from Crowdin
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
             </xs:all>
           </xs:complexType>
         </xs:element>
