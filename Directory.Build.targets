@@ -263,12 +263,13 @@
             Condition=" '@(DownloadMods)' != '' "
             SourceUrl="%(Url)"
             DestinationFolder="$(IntermediateOutputPath)/mods"
+            DestinationFileName="%(Identity).zip"
             ContinueOnError="WarnAndContinue">
 			<Output TaskParameter="DownloadedFile" ItemName="DownloadedFiles" />
 		</DownloadFile>
 
-		<RemoveDir Directories="@(DownloadMods -> '$(ModsDir)/%Identity')" />
-		<Unzip Condition=" '@(DownloadedFiles)' != '' " SourceFiles="@(DownloadedFiles)" DestinationFolder="@(DownloadMods -> '$(ModsDir)/%Identity')" />
+		<RemoveDir Directories="@(DownloadMods -> '$(ModsDir)/%(Identity)')" />
+		<Unzip Condition=" '@(DownloadedFiles)' != '' " SourceFiles="%(Identity)" DestinationFolder="$(ModsDir)/%(Filename)" />
 		<Delete Files="@(DownloadedFiles)" />
 
 		<!-- May be not included in props -->
