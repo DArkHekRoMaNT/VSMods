@@ -78,11 +78,12 @@
                     if (!string.IsNullOrWhiteSpace(Side))
                     {
                         sb.AppendLine("\t\"side\": \"" + Side + "\",");
-                        if (Side == "Universal" && !(RequiredOnClient && RequiredOnServer))
-                        {
-                            sb.AppendLine("\t\"requiredOnClient\": " + RequiredOnClient.ToString().ToLower() + ",");
-                            sb.AppendLine("\t\"requiredOnServer\": " + RequiredOnServer.ToString().ToLower() + ",");
-                        }
+                    }
+					
+                    if (!RequiredOnClient || !RequiredOnServer)
+                    {
+                        sb.AppendLine("\t\"requiredOnClient\": " + RequiredOnClient.ToString().ToLower() + ",");
+                        sb.AppendLine("\t\"requiredOnServer\": " + RequiredOnServer.ToString().ToLower() + ",");
                     }
 
                     sb.AppendLine("\t\"dependencies\": {");
