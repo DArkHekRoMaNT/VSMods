@@ -28,6 +28,9 @@
 
 	<PropertyGroup>
 		<MinimalGameVersion Condition=" '$(MinimalGameVersion)' == '' ">$(GameVersion)</MinimalGameVersion>
+		<RequiredOnClient Condition=" '$(RequiredOnClient)' == '' ">true</RequiredOnClient>
+		<RequiredOnServer Condition=" '$(RequiredOnServer)' == '' ">true</RequiredOnServer>
+		<Side Condition=" '$(Side)' == '' ">Universal</Side>
 	</PropertyGroup>
 
 	<!-- Game API, engine, libraries and vanilla mods reference -->

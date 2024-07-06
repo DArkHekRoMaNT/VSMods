@@ -74,14 +74,24 @@
                         Contributors = string.Join(", ", Contributors.Split(',').Select(e => "\"" + e.Trim() + "\""));
                         sb.AppendLine("\t\"contributors\": [" + Contributors + "],");
                     }
-
+					
                     if (!string.IsNullOrWhiteSpace(Side))
                     {
-                        sb.AppendLine("\t\"side\": \"" + Side + "\",");
-                        if (!RequiredOnClient || !RequiredOnServer)
-                        {
-                            sb.AppendLine("\t\"requiredOnClient\": " + RequiredOnClient.ToString().ToLower() + ",");
-                            sb.AppendLine("\t\"requiredOnServer\": " + RequiredOnServer.ToString().ToLower() + ",");
+					    if (Side.ToLower() != "universal")
+						{
+                            sb.AppendLine("\t\"side\": \"" + Side + "\",");
+						}
+						else
+						{
+                            if (!RequiredOnClient)
+                            {
+                                sb.AppendLine("\t\"requiredOnClient\": " + RequiredOnClient.ToString().ToLower() + ",");
+                            }
+					
+                            if (!RequiredOnServer)
+                            {
+                                sb.AppendLine("\t\"requiredOnServer\": " + RequiredOnServer.ToString().ToLower() + ",");
+                            }
                         }
                     }
 
