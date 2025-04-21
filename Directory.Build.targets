@@ -156,7 +156,7 @@
                                     {
                                         if (release.TryGetProperty("mainfile", out var mainFileElement))
                                         {
-                                            url = "https://mods.vintagestory.at/" + mainFileElement.GetString(); 
+                                            url = mainFileElement.GetString(); 
                                             break;
                                         }
                                     }
