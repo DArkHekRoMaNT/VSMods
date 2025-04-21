@@ -66,12 +66,12 @@
 		<Reference Include="$(VINTAGE_STORY)/$(GameVersion)/Lib/Mono*.dll">
 			<Private>false</Private>
 		</Reference>
-		<Reference Include="$(VINTAGE_STORY)/$(GameVersion)/Lib/OpenTK*.dll">
+		<!--Reference Include="$(VINTAGE_STORY)/$(GameVersion)/Lib/OpenTK*.dll">
 			<Private>false</Private>
-		</Reference>
-		<Reference Include="$(VINTAGE_STORY)/$(GameVersion)/Lib/Xceed*.dll">
+		</Reference-->
+		<!--Reference Include="$(VINTAGE_STORY)/$(GameVersion)/Lib/Xceed*.dll">
 			<Private>false</Private>
-		</Reference>
+		</Reference-->
 		<!--Reference Include="$(VINTAGE_STORY)/$(GameVersion)/Lib/ICSharpCode.SharpZipLib.dll">
 			<Private>false</Private>
 		</Reference-->
